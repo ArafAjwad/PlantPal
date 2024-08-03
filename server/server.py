@@ -8,11 +8,6 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Members API route
-@app.route("/members")
-def members():
-    return {"members": ["Member1", "Member2", "Member3"]}
-
 # Air Quality API route
 @app.route("/air_quality")
 def air_quality():
@@ -32,8 +27,24 @@ def air_quality():
         
         # Check if the request was successful
         if response.status_code == 200:
-            # Return the JSON response
-            return jsonify(response.json())
+            # Parse the JSON response
+            data = response.json()["data"]
+            
+            # Extract specific data points
+            extracted_data = {
+                "aqi": data["aqi"],
+                "city": data["city"]["name"],
+                "dominant_pollutant": data["dominentpol"],
+                "iaqi": data["iaqi"],
+                "temperature": data["iaqi"]["t"]["v"],
+                "humidity": data["iaqi"]["h"]["v"],
+                "pressure": data["iaqi"]["p"]["v"],
+                "forecast": data["forecast"]["daily"],
+                "uvi": data["forecast"]["daily"]["uvi"]
+            }
+            
+            # Return the extracted data as JSON
+            return jsonify(extracted_data)
         else:
             # Handle errors in the response
             return {"error": "Failed to retrieve data"}, response.status_code
